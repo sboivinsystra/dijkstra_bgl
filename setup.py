@@ -7,11 +7,13 @@ ext_modules = [
         ["pyboostgraph.cpp"],
         include_dirs=[pybind11.get_include()],
         language="c++",
+        extra_compile_args=["-O3", "-fopenmp"],  # Enable OpenMP
+        extra_link_args=["-fopenmp"],  # Link OpenMP library
     ),
 ]
 
 setup(
     name="pyboostgraph",
-    version="0.9",
+    version="0.12",
     ext_modules=ext_modules,
 )
