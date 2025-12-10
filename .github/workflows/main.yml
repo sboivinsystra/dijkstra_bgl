@@ -11,7 +11,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version:  ["3.11"]
+        python-version:  ["3.12"]
 
     steps:
       - name: Checkout
@@ -36,7 +36,7 @@ jobs:
           CIBW_PLATFORM: windows
 
           # Build only the specific CPython version
-          CIBW_BUILD: "cp${{ matrix.python-version }}-*"
+          CIBW_BUILD: "cp${{ matrix.python-version | replace('.', '') }}"
 
           # Skip PyPy
           CIBW_SKIP: "pp*"
