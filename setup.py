@@ -14,6 +14,6 @@ ext_modules = [
 
 setup(
     name="pyboostgraph",
-    version="0.13",
+    version="0.14",
     ext_modules=ext_modules,
 )
