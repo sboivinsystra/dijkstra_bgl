@@ -7,16 +7,15 @@ on:
 
 jobs:
   build-windows:
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
-        python-version:  ["3.11"]
-        cibw-build: ["cp311"]
+        os: [windows-latest]
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install Boost headers
         run: |
@@ -25,8 +24,6 @@ jobs:
 
       - name: Set up Python
         uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
 
       - name: Install build dependencies
         run: |
@@ -34,14 +31,6 @@ jobs:
 
       - name: Build wheel with cibuildwheel
         env:
-          CIBW_PLATFORM: windows
-
-          # Build only the specific CPython version
-          CIBW_BUILD: ${{ matrix.cibw-build }}
-
-          # Skip PyPy
-          CIBW_SKIP: "pp*"
-
           # Environment inside the wheel build
           CIBW_ENVIRONMENT_WINDOWS: >
             BOOST_ROOT="C:\local\boost_1_86_0"
