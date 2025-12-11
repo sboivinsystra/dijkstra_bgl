@@ -2,7 +2,7 @@ name: Build Ubuntu Wheels
 
 on:
   push:
-    branches: ["master"]
+    branches: ["deploy"]
   workflow_dispatch:
 
 jobs:
@@ -38,5 +38,5 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: bgl-wheels-${{ matrix.python-version }}
+          name: bgl-wheels-${{ matrix.os }}
           path: wheelhouse/*.whl
