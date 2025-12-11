@@ -17,10 +17,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Install Boost headers
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libboost-all-dev
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -32,6 +28,10 @@ jobs:
           pip install cibuildwheel
 
       - name: Build wheel with cibuildwheel
+        env:
+          # Install Boost inside manylinux container
+          CIBW_BEFORE_ALL_LINUX: |
+            yum install -y boost-devel
         run: |
           python -m cibuildwheel --output-dir wheelhouse
 
