@@ -34,7 +34,7 @@ jobs:
       - name: Build wheel with cibuildwheel
         env:
           CIBW_ENVIRONMENT: >
-              BOOST_ROOT="/usr/include"
+              BOOST_INCLUDEDIR="/usr/include"
         run: |
           python -m cibuildwheel --output-dir wheelhouse
 
