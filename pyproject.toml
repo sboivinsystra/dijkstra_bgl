@@ -1,7 +1,3 @@
-[tool.poetry]
-authors = ["Simon Boivin <sboivin@systra.com>"]
-readme = "README.md"
-
 [tool.poetry.dependencies]
 python = "^3.12"
 pybind11 = "^3.0.1"
@@ -13,7 +9,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "boostpy"           # Must match setup.py extension name
-version = "0.16"
+version = "0.17"
 description = "Fast Dijkstra using Boost Graph Library"
 authors = [
   { name = "Simon Boivin", email = "sboivin@systra.com" }
