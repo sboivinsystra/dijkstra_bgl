@@ -1,7 +1,4 @@
 [tool.poetry]
-name = "dijkstra-bgl"
-version = "0.2.0"
-description = ""
 authors = ["Simon Boivin <sboivin@systra.com>"]
 readme = "README.md"
 
@@ -14,6 +11,13 @@ pybind11 = "^3.0.1"
 requires = ["setuptools>=42", "wheel", "pybind11>=3.0.0"]
 build-backend = "setuptools.build_meta"
 
+[project]
+name = "boostpy"           # Must match setup.py extension name
+version = "0.15"
+description = "Fast Dijkstra using Boost Graph Library"
+authors = [
+  { name = "Simon Boivin", email = "sboivin@systra.com" }
+]
 
 [tool.cibuildwheel]
 # Which architectures to build for (e.g., x86_64, aarch64)

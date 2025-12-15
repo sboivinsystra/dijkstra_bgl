@@ -32,7 +32,6 @@ ext_modules = [
         ["boostpy.cpp"],
         include_dirs=include_dirs,
         language="c++",
-        cxx_std=14,
         extra_compile_args=omp_compile_args,
         extra_link_args=omp_link_args,
     ),
@@ -40,6 +39,5 @@ ext_modules = [
 
 setup(
     name="boostpy",
-    version="0.15",
     ext_modules=ext_modules,
 )
