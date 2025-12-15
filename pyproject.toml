@@ -13,7 +13,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "boostpy"           # Must match setup.py extension name
-version = "0.15"
+version = "0.16"
 description = "Fast Dijkstra using Boost Graph Library"
 authors = [
   { name = "Simon Boivin", email = "sboivin@systra.com" }
