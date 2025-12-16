@@ -1,59 +1,75 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/numpy.h>
-#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/compressed_sparse_row_graph.hpp>
 #include <boost/graph/dijkstra_shortest_paths.hpp>
 #include <vector>
 #include <tuple>
 #include <map>
-
 namespace py = pybind11;
+using namespace boost;
 
+// ---- Edges as (source, target) pairs ----
+using Edge = std::pair<int, int>;
+
+typedef compressed_sparse_row_graph<directedS,
+                    no_property,
+                    property<edge_weight_t, double>> Graph;
+
+void single_source_dijkstra(
+    const Graph& g,
+    int source,
+    double* dist_ptr,
+    int* pred_ptr
+) {
+
+    dijkstra_shortest_paths(
+        g,
+        source,
+        predecessor_map(make_iterator_property_map(pred_ptr, get(vertex_index, g)))
+        .distance_map(make_iterator_property_map(dist_ptr, get(vertex_index, g)))
+    );
+}
 
 
 std::tuple<py::array_t<double>, py::array_t<int>>
-directed_dijkstra(const py::object &csr_matrix,
+directed_dijkstra(const std::vector<Edge> edges,
+                  const std::vector<double> weights,
                   const std::vector<int> &sources)
 {
-
-    using namespace boost;
-    typedef adjacency_list<vecS, vecS, directedS,
-                           no_property,
-                           property<edge_weight_t, double>> Graph;
+    typedef compressed_sparse_row_graph<directedS,
+                        no_property,
+                        property<edge_weight_t, double>> Graph;
 
 
-    // Extract CSR arrays from scipy.sparse.csr_matrix
-    py::object indptr_obj = csr_matrix.attr("indptr");
-    py::object indices_obj = csr_matrix.attr("indices");
-    py::object data_obj = csr_matrix.attr("data");
-
-    std::vector<int> indptr = indptr_obj.cast<std::vector<int>>();
-    std::vector<int> indices = indices_obj.cast<std::vector<int>>();
-    std::vector<double> data = data_obj.cast<std::vector<double>>();
-
-    int num_nodes = indptr.size() - 1;
-
-    Graph g(num_nodes);
-
-    // Build graph from CSR
-    for (int u = 0; u < num_nodes; ++u) {
-        for (int idx = indptr[u]; idx < indptr[u + 1]; ++idx) {
-            int v = indices[idx];
-            double w = data[idx];
-            add_edge(u, v, w, g);  // still slow for adjacency_list
-        }
+    // Find max vertex index
+    int max_vertex = 0;
+    for (const auto &e : edges) {
+        if (e.first > max_vertex) max_vertex = e.first;
+        if (e.second > max_vertex) max_vertex = e.second;
     }
 
-    int num_sources = sources.size();
+    int num_nodes = max_vertex + 1;
 
-    // Allocate output arrays
+    // ---- THIS CONSTRUCTOR IS STABLE ----
+    Graph g(
+        edges_are_unsorted,
+        edges.begin(),
+        edges.end(),
+        weights.begin(),
+        num_nodes
+    );
+
+
+    // ---- Output arrays ----
+    const int num_sources = sources.size();
+
     py::array_t<double> distances_out({num_sources, num_nodes});
     py::array_t<int> predecessors_out({num_sources, num_nodes});
 
     auto distances_ptr = distances_out.mutable_data();
     auto predecessors_ptr = predecessors_out.mutable_data();
 
-    #pragma omp parallel for
     for (int si = 0; si < num_sources; ++si){
         int source = sources[si];
 
@@ -61,21 +77,13 @@ directed_dijkstra(const py::object &csr_matrix,
         double *dist_row = distances_ptr + si * num_nodes;
         int *pred_row = predecessors_ptr + si * num_nodes;
 
-        std::vector<double> distances(num_nodes);
+        single_source_dijkstra(g, source, dist_row, pred_row);
 
-        dijkstra_shortest_paths(
-            g, source,
-            predecessor_map(pred_row)
-                .distance_map(dist_row));
 
     }
 
-    return std::make_tuple(distances_out, predecessors_out);
+    return {distances_out, predecessors_out};
 }
-
-
-
-
 
 
 
@@ -83,7 +91,8 @@ PYBIND11_MODULE(boostpy, m)
 {
     m.doc() = "Boost Graph Library Dijkstra wrapper with multi-source support";
     m.def("directed_dijkstra", &directed_dijkstra,
-          py::arg("csr_matrix"),
+          py::arg("edges"),
+          py::arg("weights"),
           py::arg("sources"));
 
 }
