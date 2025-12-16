@@ -1,5 +1,6 @@
 [tool.poetry]
 name = "boostpy"           # Must match setup.py extension name
+version = "0.2.0"
 authors = ["Simon Boivin <sboivin@systra.com>"]
 description = "Fast Dijkstra using Boost Graph Library"
 readme = "README.md"
