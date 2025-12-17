@@ -95,7 +95,6 @@ jobs:
           ls -lh final_dist # Check the resulting directory
 
       - name: Create GitHub Release
-        # NOTE: Using yyx990803/release-tag is outdated and can be complex. 
         # softprops/action-gh-release is the current standard.
         uses: softprops/action-gh-release@v2
         with:
@@ -104,27 +103,27 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           files: final_dist/*.whl # Point to the flattened directory
 
-  publish-pypi:
-    needs: [build-linux, build-windows]
-    runs-on: ubuntu-latest
+  # publish-pypi:
+  #   needs: [build-linux, build-windows]
+  #   runs-on: ubuntu-latest
     
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v5 # FIX 3: Add checkout to access source code
+  #   steps:
+  #     - name: Checkout Code
+  #       uses: actions/checkout@v5 # FIX 3: Add checkout to access source code
 
-      - name: Download all wheels
-        uses: actions/download-artifact@v4
-        with:
-          path: temp_dist 
+  #     - name: Download all wheels
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         path: temp_dist 
       
-      - name: Flatten wheel directory
-        run: |
-          mkdir -p dist
-          find temp_dist -name "*.whl" -exec mv {} dist/ \;
+  #     - name: Flatten wheel directory
+  #       run: |
+  #         mkdir -p dist
+  #         find temp_dist -name "*.whl" -exec mv {} dist/ \;
 
-      - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@v1.10.0
-        with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
-          # The packages-dir defaults to 'dist', but we specify it for clarity
-          packages-dir: dist/
+  #     - name: Publish to PyPI
+  #       uses: pypa/gh-action-pypi-publish@v1.10.0
+  #       with:
+  #         password: ${{ secrets.PYPI_API_TOKEN }}
+  #         # The packages-dir defaults to 'dist', but we specify it for clarity
+  #         packages-dir: dist/
