@@ -116,7 +116,12 @@ jobs:
       - name: Download all wheels
         uses: actions/download-artifact@v4
         with:
-          path: dist 
+          path: temp_dist 
+      
+      - name: Flatten wheel directory
+        run: |
+          mkdir -p dist_flat
+          find temp_dist -name "*.whl" -exec mv {} dist/ \;
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@v1.10.0
