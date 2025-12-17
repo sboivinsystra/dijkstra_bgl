@@ -21,25 +21,14 @@ typedef compressed_sparse_row_graph<directedS,
 
 
 
-
-
-template <typename DistanceMap>
-class distance_cutoff_visitor : public default_dijkstra_visitor {
-public:
-    distance_cutoff_visitor(DistanceMap dist, double cutoff)
-        : dist_map(dist), cutoff_distance(cutoff) {}
-
-    template <typename Vertex, typename Graph>
-    void examine_vertex(Vertex u, const Graph& g) const {
-        if (get(dist_map, u) > cutoff_distance) {
-            throw std::runtime_error("cutoff reached"); // stop Dijkstra
-        }
+int get_max_vertex(const std::vector<Edge>& edges) {
+    int max_v = 0;
+    for (const auto &e : edges) {
+        if (e.first > max_v) max_v = e.first;
+        if (e.second > max_v) max_v = e.second;
     }
-
-private:
-    DistanceMap dist_map;
-    double cutoff_distance;
-};
+    return max_v + 1; // zero-indexed
+}
 
 std::tuple<py::array_t<double>, py::array_t<int>>
 directed_dijkstra(const std::vector<Edge> &edges,
@@ -52,14 +41,7 @@ directed_dijkstra(const std::vector<Edge> &edges,
     if (num_threads > 0)
         omp_set_num_threads(num_threads);
 
-    // Find max vertex index
-    int max_vertex = 0;
-    for (const auto &e : edges) {
-        if (e.first > max_vertex) max_vertex = e.first;
-        if (e.second > max_vertex) max_vertex = e.second;
-    }
-
-    int num_nodes = max_vertex + 1;
+    int num_nodes = get_max_vertex(edges);
 
     // ---- THIS CONSTRUCTOR IS STABLE ----
     Graph g(
@@ -102,6 +84,24 @@ directed_dijkstra(const std::vector<Edge> &edges,
     return {distances_out, predecessors_out};
 }
 
+template <typename DistanceMap>
+class distance_cutoff_visitor : public default_dijkstra_visitor {
+public:
+    distance_cutoff_visitor(DistanceMap dist, double cutoff)
+        : dist_map(dist), cutoff_distance(cutoff) {}
+
+    template <typename Vertex, typename Graph>
+    void examine_vertex(Vertex u, const Graph& g) const {
+        if (get(dist_map, u) > cutoff_distance) {
+            throw std::runtime_error("cutoff reached"); // stop Dijkstra
+        }
+    }
+
+private:
+    DistanceMap dist_map;
+    double cutoff_distance;
+};
+
 
 std::tuple<py::array_t<double>, py::array_t<int>>
 limited_directed_dijkstra(const std::vector<Edge> &edges,
@@ -115,14 +115,7 @@ limited_directed_dijkstra(const std::vector<Edge> &edges,
     if (num_threads > 0)
         omp_set_num_threads(num_threads);
 
-    // Find max vertex index
-    int max_vertex = 0;
-    for (const auto &e : edges) {
-        if (e.first > max_vertex) max_vertex = e.first;
-        if (e.second > max_vertex) max_vertex = e.second;
-    }
-
-    int num_nodes = max_vertex + 1;
+    int num_nodes = get_max_vertex(edges);
 
     // ---- THIS CONSTRUCTOR IS STABLE ----
     Graph g(
