@@ -16,6 +16,10 @@ version = "1.0.2"
 git tag -a 'v1.0.2' -m 'description'
 ```
 
+```sh
+git push origin v1.0.2
+```
+
 Github action will build wheels for windows and Linux.
 
 3) when Done, upload to Pypi

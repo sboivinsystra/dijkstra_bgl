@@ -30,6 +30,16 @@ int get_max_vertex(const std::vector<Edge>& edges) {
     return max_v + 1; // zero-indexed
 }
 
+double INF = std::numeric_limits<double>::infinity();
+
+void finalize_predecessors(int* pred_row, int num_nodes) {
+    for (int i = 0; i < num_nodes; ++i) {
+        if (pred_row[i] == i){
+            pred_row[i] = -9999;
+        }
+    }
+}
+
 std::tuple<py::array_t<double>, py::array_t<int>>
 directed_dijkstra(const std::vector<Edge> &edges,
                   const std::vector<double> &weights,
@@ -78,7 +88,7 @@ directed_dijkstra(const std::vector<Edge> &edges,
             .distance_map(dist_map)
         );
         
-
+        finalize_predecessors(pred_row, num_nodes);
     }
 
     return {distances_out, predecessors_out};
@@ -156,6 +166,7 @@ limited_directed_dijkstra(const std::vector<Edge> &edges,
         } catch (const std::runtime_error&) {
             // cutoff reached, Dijkstra stopped early
         }
+        finalize_predecessors(pred_row, num_nodes);
     
     }
 
