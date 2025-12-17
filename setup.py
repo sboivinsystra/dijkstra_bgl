@@ -39,6 +39,8 @@ ext_modules = [
 
 setup(
     name="boostpy",
-    version="1.0",
+    version="1.0.0",
+    authors=["Simon Boivin <sboivin@systra.com>"],
+    description="Fast Dijkstra using Boost Graph Library",
     ext_modules=ext_modules,
 )
