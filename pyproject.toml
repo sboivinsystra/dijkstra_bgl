@@ -11,6 +11,16 @@ pybind11 = "^3.0.1"
 twine = "^6.2.0"
 
 
+[project]
+name = "fast_dijkstra"
+version = "1.0.1"
+authors = ["Simon Boivin <sboivin@systra.com>"]
+description = "Fast Dijkstra using Boost Graph Library"
+readme = "README.md"
+
+[project.urls]
+Homepage = "https://github.com/sboivinsystra/dijkstra_bgl"
+
 [build-system]
 requires = ["setuptools>=42", "wheel", "pybind11>=3.0.0"]
 build-backend = "setuptools.build_meta"
@@ -18,6 +28,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.cibuildwheel]
 # Which architectures to build for (e.g., x86_64, aarch64)
+manylinux-x86_64-image = "manylinux_2_28"
 archs = ["auto"]
 
 # Exclude some older or less common Python versions

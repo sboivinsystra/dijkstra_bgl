@@ -29,7 +29,6 @@ jobs:
       - name: Build wheel with cibuildwheel
         env:
           # Install Boost inside manylinux container
-          CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
           CIBW_BEFORE_ALL_LINUX: |
             yum install -y boost-devel
         run: |
