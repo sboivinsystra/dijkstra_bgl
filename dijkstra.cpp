@@ -27,18 +27,18 @@ void dijkstra_csr(
     // Init
     for (int i = 0; i < g.n; ++i) {
         dist[i] = INF;
-        pred[i] = -1;
+        pred[i] = -9999;
     }
 
     using Item = std::pair<double, int>;
-    std::priority_queue<Item, std::vector<Item>, std::greater<Item>> pq;
+    std::priority_queue<Item, std::vector<Item>, std::greater<Item>> queue;
 
     dist[source] = 0.0;
-    pq.emplace(0.0, source);
+    queue.emplace(0.0, source);
 
-    while (!pq.empty()) {
-        auto [d, u] = pq.top();
-        pq.pop();
+    while (!queue.empty()) {
+        auto [d, u] = queue.top();
+        queue.pop();
 
         if (d > dist[u]) continue;
         if (d > cutoff) break;
@@ -50,7 +50,7 @@ void dijkstra_csr(
             if (nd < dist[v] && nd <= cutoff) {
                 dist[v] = nd;
                 pred[v] = u;
-                pq.emplace(nd, v);
+                queue.emplace(nd, v);
             }
         }
     }
@@ -60,10 +60,10 @@ void dijkstra_csr(
 
 std::tuple<py::array_t<double>, py::array_t<int>>
 multi_source_dijkstra(
-    py::array_t<int, py::array::c_style | py::array::forcecast> indptr,
-    py::array_t<int, py::array::c_style | py::array::forcecast> indices,
-    py::array_t<double, py::array::c_style | py::array::forcecast> weights,
-    py::array_t<int, py::array::c_style | py::array::forcecast> sources,
+    py::array_t<int> indptr,
+    py::array_t<int> indices,
+    py::array_t<double> weights,
+    py::array_t<int> sources,
     double cutoff = std::numeric_limits<double>::infinity()
 ) {
     // ---- Validate shapes ----
@@ -71,31 +71,35 @@ multi_source_dijkstra(
         throw std::runtime_error("indices and weights must have same length");
     }
 
-    int n = indptr.size() - 1;
+    int num_nodes = indptr.size() - 1;
     int num_sources = sources.size();
 
     // ---- Build graph (once) ----
     CSRGraph g;
-    g.n = n;
+    g.n = num_nodes;
     g.indptr.assign(indptr.data(), indptr.data() + indptr.size());
     g.indices.assign(indices.data(), indices.data() + indices.size());
     g.weights.assign(weights.data(), weights.data() + weights.size());
 
     // ---- Allocate outputs ----
-    py::array_t<double> distances({num_sources, n});
-    py::array_t<int> predecessors({num_sources, n});
+    py::array_t<double> distances_out({num_sources, num_nodes});
+    py::array_t<int> predecessors_out({num_sources, num_nodes});
 
-    auto* dist_ptr = distances.mutable_data();
-    auto* pred_ptr = predecessors.mutable_data();
+    auto distances_ptr = distances_out.mutable_data();
+    auto predecessors_ptr = predecessors_out.mutable_data();
     const int* src_ptr = sources.data();
+
 
     // ---- Run Dijkstra for each source ----
     for (int i = 0; i < num_sources; ++i) {
+        int source = src_ptr[i];
+        double *dist_row = distances_ptr + i * num_nodes;
+        int *pred_row = predecessors_ptr + i * num_nodes;
         dijkstra_csr(
             g,
-            src_ptr[i],
-            dist_ptr + i * n,
-            pred_ptr + i * n,
+            source,
+            dist_row,
+            pred_row,
             cutoff
         );
     }
