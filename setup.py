@@ -8,7 +8,7 @@ system = platform.system()
 # Define OpenMP flags based on the compiler
 def get_openmp_flags():
     if system == "Windows":
-        return ["/openmp"], []  # Compile flags, Link flags
+        return ["/std:c++17", "/openmp"], []  # Compile flags, Link flags
     elif system == "Darwin":  # macOS (Apple Clang) is tricky with OpenMP
         # You might need 'libomp' installed via brew
         return ["-Xpreprocessor", "-fopenmp"], ["-lomp"]
