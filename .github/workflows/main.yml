@@ -31,6 +31,11 @@ jobs:
           # Install Boost inside manylinux container
           CIBW_BEFORE_ALL_LINUX: |
             yum install -y boost-devel
+          CIBW_BEFORE_BUILD_LINUX: "rm -rf build/ dist/ *.so *.egg-info"
+          CIBW_ENVIRONMENT_LINUX: >
+            CFLAGS="-O3 -s -flto"
+            CXXFLAGS="-O3 -s -flto -fvisibility=hidden"
+            LDFLAGS="-s -flto -static-libstdc++ -static-libgcc"
         run: |
           python -m cibuildwheel --output-dir wheelhouse
 
