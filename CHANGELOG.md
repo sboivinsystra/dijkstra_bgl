@@ -1,3 +1,12 @@
+## [2.1.1] (2026-01-05)
+## changes
+* remove limit early exit (more like scipy)
+* rename variables
+
+## [2.1.0] (2026-01-05)
+## changes
+* add num_threads as argument (-1 is auto)
+
 ## [2.0.2] (2025-12-23)
 ## Bug fixes
 * add macOS wheel

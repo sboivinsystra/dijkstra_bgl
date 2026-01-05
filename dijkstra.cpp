@@ -34,21 +34,22 @@ void single_source_dijkstra(
     heap.emplace(0.0, source);
 
     while (!heap.empty()) {
-        auto [d, u] = heap.top();
+        auto [current_dist, current_node] = heap.top();
         heap.pop();
 
-        if (d > dist[u]) continue;
-        if (d > cutoff) break;
+        if (current_dist > dist[current_node]) continue;
         // check neighbors
-        for (int ei = g.indptr[u]; ei < g.indptr[u + 1]; ++ei) {
-            int v = g.indices[ei];
-            double nd = d + g.weights[ei];
-
-            if (nd < dist[v] && nd <= cutoff) {
-                dist[v] = nd;
-                pred[v] = u;
-                heap.emplace(nd, v);
+        for (int j = g.indptr[current_node]; j < g.indptr[current_node + 1]; ++j) {
+            int next_node = g.indices[j];
+            double next_dist = current_dist + g.weights[j];
+            if (next_dist <= cutoff){
+                if (next_dist < dist[next_node]) {
+                    dist[next_node] = next_dist;
+                    pred[next_node] = current_node;
+                    heap.emplace(next_dist, next_node);
+                }
             }
+           
         }
     }
 }
