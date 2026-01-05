@@ -28,9 +28,6 @@ jobs:
 
       - name: Build wheel with cibuildwheel
         env:
-          # Install Boost inside manylinux container
-          CIBW_BEFORE_ALL_LINUX: |
-            yum install -y boost-devel
           CIBW_BEFORE_BUILD_LINUX: "rm -rf build/ dist/ *.so *.egg-info"
           CIBW_ENVIRONMENT_LINUX: >
             CFLAGS="-O3 -s -flto"
@@ -51,11 +48,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Install Boost headers
-        run: |
-          choco install boost-msvc-14.3 -y --version=1.87.0
-        # Headers go into C:\local\boost_*\
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -69,8 +61,6 @@ jobs:
         env:
           # Environment inside the wheel build
           CIBW_ENVIRONMENT_WINDOWS: >
-              BOOST_ROOT="C:\\local\\boost_1_87_0"
-              BOOST_INCLUDEDIR="C:\\local\\boost_1_87_0"
               CMAKE_GENERATOR="Visual Studio 17 2022"
         run: |
           python -m cibuildwheel --output-dir wheelhouse
@@ -82,8 +72,40 @@ jobs:
 
           path: wheelhouse/*.whl
 
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install build dependencies
+        run: |
+          pip install cibuildwheel
+
+      - name: Build wheel with cibuildwheel
+        env:
+          CIBW_BEFORE_BUILD_MACOS: "brew install libomp"
+          CIBW_ENVIRONMENT_MACOS: >
+            LDFLAGS="-L$(brew --prefix libomp)/lib"
+            CPPFLAGS="-I$(brew --prefix libomp)/include"
+            MACOSX_DEPLOYMENT_TARGET=15.0
+        run: |
+          python -m cibuildwheel --output-dir wheelhouse
+
+      - name: Upload wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-macos
+          path: wheelhouse/*.whl
+
   release:
-    needs: [build-linux, build-windows]
+    needs: [build-linux, build-windows, build-macos]
     runs-on: ubuntu-latest
     
     steps:
